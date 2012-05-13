@@ -1,4 +1,4 @@
-{"shell-version": ["3.2.2.1"], 
+{"shell-version": ["3.2" "3.3" "3,4"], 
 "uuid": "virtualbox-search-provider@busaster.gmail.com", 
 "name": "VirtualBox Vm Search Provider", 
 "description": "Search between virtualbox vm's"}
