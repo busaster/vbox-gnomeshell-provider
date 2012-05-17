@@ -1,8 +1,8 @@
 vbox-gnomeshell-provider
 ========================
 
-This extension searches betwqeen installed virtualbox virtual machines and allow to start them
-I wrote irt starting from "SSH Search Provider" by Bernd Schlapsi
+This extension searches between installed virtualbox virtual machines and allow to start them.
+I wrote it starting from "SSH Search Provider" by Bernd Schlapsi
 
 ### License
 Copyright (c) 2011 Gianrico Busa <busaster@gmail.com>
