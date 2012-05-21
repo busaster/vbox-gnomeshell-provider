@@ -98,7 +98,7 @@ VirtualBoxSearchProvider.prototype = {
           content=content.substring(indexOfMachine);  
           startIndex=content.indexOf('src=')+5;
           content=content.substring(startIndex);
-          endIndex=content.indexOf('/>');
+          endIndex=content.indexOf('"/>');
           machine=content.substring(0,endIndex);
           //global.log('machine= '+machine+'<br>');
           content=content.substring(1);
@@ -138,7 +138,7 @@ VirtualBoxSearchProvider.prototype = {
         //global.log("getInitialResultSet called : terms "+terms);
         let searchResults = [];
         for (var i=0; i<this._virtualMachineNames.length; i++) {
-            let searchTarget=this._virtualMachineNames[j]+" (VirtualBox VM)";
+            let searchTarget=this._virtualMachineNames[i]+" (VirtualBox VM)";
             for (var j=0; j<terms.length; j++) {
                 //global.log("Check if "+searchTarget.toUpperCase()+" matches with "+terms[j].toUpperCase());
                 try {
