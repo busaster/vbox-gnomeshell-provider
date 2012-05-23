@@ -70,13 +70,11 @@ VirtualBoxSearchProvider.prototype = {
             event_type == Gio.FileMonitorEvent.CHANGES_DONE_HINT)
         {
             // the config file is a xml file in wich we have to find the tag "MachineRegistry"
-            // Inside this tag whe find N "MachineEntry" tags, each one with an attribute, "src", where the VM file full path is stored
-            // I tried to use E4X but without luck. At that point I sue my parser            
-            
+            // Inside this tag whe find N "MachineEntry" tags, each one with an attribute, "src", where the VM file full path is stored            
             let content = String(file.load_contents(null)[1]);
             this._findMachines(content);
             this._virtualMachineNames=[];
-            for (var i=0;i<this._virtualMachineFiles.length;i++)
+            for (var i=0;i<this._virtualMachineFiles.length();i++)
             {
               let splittedPath=this._virtualMachineFiles[i].split('/');
               this._virtualMachineNames[i]=splittedPath[splittedPath.length-1].split('.')[0];
@@ -87,26 +85,13 @@ VirtualBoxSearchProvider.prototype = {
     },
     
     _findMachines: function(content) {
-        this._virtualMachineFiles = [];
-        let indexOfMachine =content.search(XML_MACHINE_ENTRY);
-        let mi=0;
-        let machine="";
-        let startIndex=0;
-        let endIndex=0;
-        while(indexOfMachine>=0)
-        {
-          content=content.substring(indexOfMachine);  
-          startIndex=content.indexOf('src=')+5;
-          content=content.substring(startIndex);
-          endIndex=content.indexOf('"/>');
-          machine=content.substring(0,endIndex);
-          //global.log('machine= '+machine+'<br>');
-          content=content.substring(1);
-          indexOfMachine = content.search(XML_MACHINE_ENTRY);
-          this._virtualMachineFiles[mi++]=machine;
-        }
+        // E4X doesn't like the <?XML ...'> part, removing..
+        content=content.replace(/<\?.*\?>/g,"");
+        let x=new XML(content);
+        let ns=x.namespace();
+        this._virtualMachineFiles=x.ns::Global.ns::MachineRegistry.ns::MachineEntry.@src;
     },
-
+    
     getResultMetas: function(resultIds) {
         let metas = [];
 
@@ -130,7 +115,7 @@ VirtualBoxSearchProvider.prototype = {
     },
 
     activateResult: function(id) {
-        global.log("Start bm : "+id.name);
+        //global.log("Start bm : "+id.name);
         Util.spawn(['vboxmanage', 'startvm', id.name]);
     },
 
@@ -159,7 +144,7 @@ VirtualBoxSearchProvider.prototype = {
             return(searchResults);
         }
         //else
-        //    global.log("NO results for "+term);
+        //    //global.log("NO results for "+term);
 
         return [];
     },
@@ -174,22 +159,22 @@ function init(meta) {
 
 function enable() {
     if (vboxSearchProvider==null) {
-		global.log('Activating vboxSearchProvider')
+		//global.log('Activating vboxSearchProvider')
         vboxSearchProvider = new VirtualBoxSearchProvider();
         Main.overview.addSearchProvider(vboxSearchProvider);
     }
 	else
-		global.log('vboxSearchProvider NOT NULL and enabling : ERROR ?')
+		//global.log('vboxSearchProvider NOT NULL and enabling : ERROR ?')
 }
 
 function disable() {
     if  (vboxSearchProvider!=null) {
-		global.log('Disabling vboxSearchProvider')
+		//global.log('Disabling vboxSearchProvider')
         Main.overview.removeSearchProvider(vboxSearchProvider);
         vboxSearchProvider.configMonitor.cancel();
         vboxSearchProvider = null;
     }
 	else
-		global.log('vboxSearchProvider NULL and disabling : ERROR ?')
+		//global.log('vboxSearchProvider NULL and disabling : ERROR ?')
 }
 
