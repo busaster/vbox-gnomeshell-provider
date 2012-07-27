@@ -78,9 +78,9 @@ VirtualBoxSearchProvider.prototype = {
             {
               let splittedPath=this._virtualMachineFiles[i].split('/');
               this._virtualMachineNames[i]=splittedPath[splittedPath.length-1].split('.')[0];
-              global.log('virtual machine name : '+this._virtualMachineNames[i])
+              // global.log('virtual machine name : '+this._virtualMachineNames[i])
             }
-            global.log('virtual machine name : '+this._virtualMachineNames.length)
+            // global.log('virtual machine name : '+this._virtualMachineNames.length)
         }
     },
     
