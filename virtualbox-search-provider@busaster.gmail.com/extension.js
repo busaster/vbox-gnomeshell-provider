@@ -78,9 +78,9 @@ VirtualBoxSearchProvider.prototype = {
             {
               let splittedPath=this._virtualMachineFiles[i].split('/');
               this._virtualMachineNames[i]=splittedPath[splittedPath.length-1].split('.')[0];
-              //global.log('virtual machine name : '+this._virtualMachineNames[i])
+              global.log('virtual machine name : '+this._virtualMachineNames[i])
             }
-            //global.log('virtual machine name : '+this._virtualMachineNames.length)
+            global.log('virtual machine name : '+this._virtualMachineNames.length)
         }
     },
     
@@ -163,8 +163,8 @@ function enable() {
         vboxSearchProvider = new VirtualBoxSearchProvider();
         Main.overview.addSearchProvider(vboxSearchProvider);
     }
-	else
-		//global.log('vboxSearchProvider NOT NULL and enabling : ERROR ?')
+    // else
+    //  global.log('vboxSearchProvider NOT NULL and enabling : ERROR ?')
 }
 
 function disable() {
@@ -174,7 +174,7 @@ function disable() {
         vboxSearchProvider.configMonitor.cancel();
         vboxSearchProvider = null;
     }
-	else
-		//global.log('vboxSearchProvider NULL and disabling : ERROR ?')
+    // else
+    //   global.log('vboxSearchProvider NULL and disabling : ERROR ?')
 }
 
