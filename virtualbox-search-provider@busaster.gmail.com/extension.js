@@ -57,6 +57,7 @@ VirtualBoxSearchProvider.prototype = {
         this.configMonitor.connect('changed', Lang.bind(this, this._onConfigChanged));
         // when initialized we fire an event of creation in order to fill the VM's list 
         this._onConfigChanged(null, configFile, null, Gio.FileMonitorEvent.CREATED);
+        // global.log('virtual machine init done ');
     },
 
     _onConfigChanged: function(filemonitor, file, other_file, event_type) {
@@ -78,9 +79,9 @@ VirtualBoxSearchProvider.prototype = {
             {
               let splittedPath=this._virtualMachineFiles[i].split('/');
               this._virtualMachineNames[i]=splittedPath[splittedPath.length-1].split('.')[0];
-              //global.log('virtual machine name : '+this._virtualMachineNames[i])
+              // global.log('virtual machine name : '+this._virtualMachineNames[i]);
             }
-            //global.log('virtual machine name : '+this._virtualMachineNames.length)
+            // global.log('loaded total number of virtual machines : '+this._virtualMachineNames.length);
         }
     },
     
@@ -92,20 +93,27 @@ VirtualBoxSearchProvider.prototype = {
         this._virtualMachineFiles=x.ns::Global.ns::MachineRegistry.ns::MachineEntry.@src;
     },
     
-    getResultMetas: function(resultIds) {
+    getResultMetas: function(resultIds, callback) {
         let metas = [];
 
         for (let i = 0; i < resultIds.length; i++) {
             metas.push(this.getResultMeta(resultIds[i]));
         }
-        return metas;
+        // GNOME 3.5.1 or so introduced passing result asynchronously
+        // via callback so try that first - if it fails then simply
+        // return the results to stay compatible with 3.4
+        try {
+            callback(metas);
+        } finally {
+            return metas;
+        }
     },
 
     getResultMeta: function(resultId) {
-        //global.log("getResultMeta called : resultId "+resultId.name);
+        // global.log("getResultMeta called : resultId "+resultId.name);
         let appSys = Shell.AppSystem.get_default();
         let app = appSys.lookup_app('virtualbox.desktop');
-
+        // global.log("getResultMeta for " + resultId + " with name " + resultId.name + " and icon " + app);
         return {'id': resultId,
                  'name': resultId.name,
                  'createIcon': function(size) {
@@ -115,17 +123,17 @@ VirtualBoxSearchProvider.prototype = {
     },
 
     activateResult: function(id) {
-        //global.log("Start bm : "+id.name);
+        // global.log("Start bm : "+id.name);
         Util.spawn(['vboxmanage', 'startvm', id.name]);
     },
 
     getInitialResultSet: function(terms) {
-        //global.log("getInitialResultSet called : terms "+terms);
+        // global.log("getInitialResultSet called : terms "+terms);
         let searchResults = [];
         for (var i=0; i<this._virtualMachineNames.length; i++) {
             let searchTarget=this._virtualMachineNames[i]+" (VirtualBox VM)";
             for (var j=0; j<terms.length; j++) {
-                //global.log("Check if "+searchTarget.toUpperCase()+" matches with "+terms[j].toUpperCase());
+                // global.log("Check if "+searchTarget.toUpperCase()+" matches with "+terms[j].toUpperCase());
                 try {
                     if (searchTarget.toUpperCase().match(terms[j].toUpperCase())) {
                         searchResults.push({
@@ -140,13 +148,20 @@ VirtualBoxSearchProvider.prototype = {
             }
         }
         if (searchResults.length > 0) {
-            //global.log("have results : "+searchResults);
-            return(searchResults);
+            // GNOME 3.5.1 or so introduced passing result asynchronously
+            // via pushResults() so try that first - if it fails then
+            // simply return the results to stay compatible with 3.4
+            try {
+                this.searchSystem.pushResults(this, searchResults);
+                // global.log("pushed results : "+searchResults);
+            } finally {
+                return searchResults;
+            }
         }
-        //else
-        //    //global.log("NO results for "+term);
-
-        return [];
+        else {
+            // global.log("NO results for "+term);
+            return searchResults;
+        }
     },
 
     getSubsearchResultSet: function(previousResults, terms) {
@@ -159,22 +174,22 @@ function init(meta) {
 
 function enable() {
     if (vboxSearchProvider==null) {
-		//global.log('Activating vboxSearchProvider')
+	//global.log('Activating vboxSearchProvider')
         vboxSearchProvider = new VirtualBoxSearchProvider();
         Main.overview.addSearchProvider(vboxSearchProvider);
     }
-	else
-		//global.log('vboxSearchProvider NOT NULL and enabling : ERROR ?')
+    // else
+    //  global.log('vboxSearchProvider NOT NULL and enabling : ERROR ?')
 }
 
 function disable() {
     if  (vboxSearchProvider!=null) {
-		//global.log('Disabling vboxSearchProvider')
+	//global.log('Disabling vboxSearchProvider')
         Main.overview.removeSearchProvider(vboxSearchProvider);
         vboxSearchProvider.configMonitor.cancel();
         vboxSearchProvider = null;
     }
-	else
-		//global.log('vboxSearchProvider NULL and disabling : ERROR ?')
+    // else
+    //   global.log('vboxSearchProvider NULL and disabling : ERROR ?')
 }
 
