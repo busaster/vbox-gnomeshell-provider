@@ -1,5 +1,8 @@
-{"shell-version": ["3.2", "3.3", "3.4", "3.6"], 
-"uuid": "virtualbox-search-provider@busaster.gmail.com", 
-"name": "VirtualBox Vm Search Provider", 
-"description": "Search between virtualbox vm's",
-"url": "https://github.com/busaster/vbox-gnomeshell-provider"}
+{
+  "shell-version": ["3.8"], 
+  "uuid": "virtualbox-search-provider@busaster.gmail.com", 
+  "name": "VirtualBox Vm Search Provider", 
+  "description": "Search between virtualbox vm's",
+  "url": "https://github.com/busaster/vbox-gnomeshell-provider",
+  "version": 2
+}

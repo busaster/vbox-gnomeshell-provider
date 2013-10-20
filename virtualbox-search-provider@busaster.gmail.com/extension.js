@@ -14,14 +14,20 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ *
+ * This plugin is heavily based on Bernd Schlapsi's "Ssh Search Provider for Gnome Shell"
+ * Updates for Gnome Shell 3.8 by BowerStudios.com
  */
 const Main = imports.ui.main;
-const Search = imports.ui.search;
+const Clutter = imports.gi.Clutter;
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const Lang = imports.lang;
 const Shell = imports.gi.Shell;
+const St = imports.gi.St;
 const Util = imports.misc.util;
+const IconGrid = imports.ui.iconGrid;
 
 // Settings
 const XML_MACHINE_ENTRY = '<MachineEntry .*/>';
@@ -31,17 +37,42 @@ const XML_MACHINE_ENTRY = '<MachineEntry .*/>';
 // or has been disabled via disable().
 var vboxSearchProvider = null;
 
+const VboxSearchIconBin = new Lang.Class({
+    Name: 'VboxSearchIconBin',
+
+    _init: function(vbox_app, name) {
+        this.actor = new St.Bin({ reactive: true,
+                                  track_hover: true });
+        this._vbox_app = vbox_app
+        this.icon = new IconGrid.BaseIcon(name,
+                                          { showLabel: true,
+                                            createIcon: Lang.bind(this, this.createIcon)});
+        this.actor.child = this.icon.actor;
+        this.actor.label_actor = this.icon.label;
+    },
+
+    createIcon: function(size) {
+        let box = new Clutter.Box();
+        let icon = new St.Icon({ icon_name: 'vboxsearch',
+                                 icon_size: size });
+        box.add_child(icon);
+        let emblem = new St.Icon({ icon_name: 'computer',
+                                   icon_size: 96});
+        box.add_child(emblem);
+        return box;
+    }
+});
+
 function VirtualBoxSearchProvider() {
     this._init();
 }
 
 VirtualBoxSearchProvider.prototype = {
-    __proto__: Search.SearchProvider.prototype,
 
     _init: function(name) {
-        Search.SearchProvider.prototype._init.call(this, "VIRTUALBOX VIRTUAL MACHINES");
-        
         let filename = '';
+
+		this.id = 'VirtualMachines'
         this._virtualMachineFiles = [];
         this._virtualMachineNames = [];
         
@@ -93,37 +124,30 @@ VirtualBoxSearchProvider.prototype = {
         this._virtualMachineFiles=x.ns::Global.ns::MachineRegistry.ns::MachineEntry.@src;
     },
     
-    getResultMetas: function(resultIds, callback) {
-        let metas = [];
+    createResultActor: function(result, terms) {
 
-        for (let i = 0; i < resultIds.length; i++) {
-            metas.push(this.getResultMeta(resultIds[i]));
-        }
-        // GNOME 3.5.1 or so introduced passing result asynchronously
-        // via callback so try that first - if it fails then simply
-        // return the results to stay compatible with 3.4
-        try {
-            callback(metas);
-        } finally {
-            return metas;
-        }
+        let appSys = Shell.AppSystem.get_default();
+        let app = appSys.lookup_app('virtualbox.desktop');
+
+        let icon = new VboxSearchIconBin(app, result.name);
+        return icon.actor;
+    },
+
+    getResultMetas: function(resultIds, callback) {
+        let metas = resultIds.map(this.getResultMeta, this);
+        callback(metas);
     },
 
     getResultMeta: function(resultId) {
-        // global.log("getResultMeta called : resultId "+resultId.name);
-        let appSys = Shell.AppSystem.get_default();
-        let app = appSys.lookup_app('virtualbox.desktop');
-        // global.log("getResultMeta for " + resultId + " with name " + resultId.name + " and icon " + app);
+        // global.log("getResultMeta for " + resultId + " with name " + resultId.name );
+        
         return {'id': resultId,
-                 'name': resultId.name,
-                 'createIcon': function(size) {
-                                   return app.create_icon_texture(size);
-                               }
+                 'name': resultId.name
                };
     },
 
     activateResult: function(id) {
-        // global.log("Start bm : "+id.name);
+        // global.log("Start vm : "+id.name);
         Util.spawn(['vboxmanage', 'startvm', id.name]);
     },
 
@@ -174,7 +198,7 @@ function init(meta) {
 
 function enable() {
     if (vboxSearchProvider==null) {
-	//global.log('Activating vboxSearchProvider')
+		// global.log('Activating vboxSearchProvider')
         vboxSearchProvider = new VirtualBoxSearchProvider();
         Main.overview.addSearchProvider(vboxSearchProvider);
     }
