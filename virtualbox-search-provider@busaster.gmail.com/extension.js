@@ -73,7 +73,7 @@ const VBoxMachinesSearchProvider = new Lang.Class({
     },
 
     getResultMeta: function (elem) {
-        return { id: elem.id,
+       return { id: elem.id,
                  name: elem.name
                };
     },
@@ -101,7 +101,8 @@ const VBoxMachinesSearchProvider = new Lang.Class({
          //log('partialM> '+matches[0]); 		          
 		   vms=vms.substring(vms.indexOf(matches[0])+matches[0].length);
 		   var vmid=singleRegExp.exec(matches[0]);
-		   results.push({ if:String(vmid[1]), name:String(matches[1]) });
+		   //log('partialM> '+vmid);
+		   results.push({ id:String(vmid[0]), name:String(matches[1]) });
 		 }   
 		}		
 		while (matches!=null);
@@ -138,7 +139,8 @@ const VBoxMachinesSearchProvider = new Lang.Class({
         callback(metas);
     },
 
-    activateResult: function (id) {
+    activateResult: function (id,terms) {
+        //log('id '+id+ ' terms '+terms);
         Util.spawn([ 'vboxmanage', 'startvm', id ]);
     },     
 });
