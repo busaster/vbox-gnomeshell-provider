@@ -78,7 +78,7 @@ const VBoxMachinesSearchProvider = new Lang.Class({
                };
     },
     
-    _getResultSet: function (results, terms) {
+    _getResultSet: function (results, terms) { 
 		var vms;
 		
 		try {
@@ -87,10 +87,11 @@ const VBoxMachinesSearchProvider = new Lang.Class({
 		   Main.notifyError("VirtualBox machines launcher : " + err.message);		
 			return;
 		}
+		log('Terms>'+terms);
 		var mainRegExp = new RegExp('\"(.*' + terms + '.*)"\ *\{.*\}','mi');
 		var singleRegExp = new RegExp('\{.*\}','mi');
 		var matches = null;
-		var results = new Array();
+		results=new Array();
 		//log('vms>'+vms);
 		// multiple matches are not handled by RegEx so I remove the matched value from the orignal string and 
       // loop until mathse is not null		
@@ -105,8 +106,6 @@ const VBoxMachinesSearchProvider = new Lang.Class({
 		}		
 		while (matches!=null);
 		//log('finalM> '+results);
-		if (results.length==0)
-		  return;
 		this.searchSystem.setResults(this, results);
     },
 

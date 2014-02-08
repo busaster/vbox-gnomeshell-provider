@@ -4,5 +4,5 @@
   "name": "VirtualBox Vm Search Provider", 
   "description": "Search between virtualbox vm's",
   "url": "https://github.com/busaster/vbox-gnomeshell-provider",
-  "version": 3
+  "version": 3.1
 }
